@@ -1,0 +1,462 @@
+<!-- Top Navigation -->
+<header class="bg-cyan-700 text-white shadow-md sticky top-0 z-50">
+    <div class="max-w-7xl mx-auto px-4 py-3 flex justify-between items-center">
+        <div class="flex items-center space-x-3">
+            <i class="fa-solid fa-鱼 text-2xl text-cyan-200"></i>
+            <span class="text-xl font-bold tracking-wide">AquaSmart</span>
+        </div>
+        <nav class="hidden md:flex space-x-6 text-sm font-medium">
+            <button onclick="switchTab('dashboard')" class="nav-link hover:text-cyan-200 transition cursor-pointer active-tab" data-target="dashboard">Dashboard</button>
+            <button onclick="switchTab('marketplace')" class="nav-link hover:text-cyan-200 transition cursor-pointer" data-target="marketplace">Pasar Ikan</button>
+            <button onclick="switchTab('calculator')" class="nav-link hover:text-cyan-200 transition cursor-pointer" data-target="calculator">Kalkulator Pakan</button>
+            <button onclick="switchTab('forum')" class="nav-link hover:text-cyan-200 transition cursor-pointer" data-target="forum">Konsultasi Ahli</button>
+        </nav>
+        <div class="flex items-center space-x-3">
+            <span class="text-xs bg-cyan-800 px-3 py-1 rounded-full border border-cyan-600">Petambak Pro</span>
+        </div>
+    </div>
+</header>
+
+<!-- Main Container -->
+<main class="max-w-7xl mx-auto px-4 py-6">
+
+    <!-- TAB 1: DASHBOARD / MONITORING KOLAM -->
+    <section id="dashboard" class="tab-content space-y-6">
+        <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+            <div>
+                <h1 class="text-2xl font-bold text-slate-900">Monitoring Kolam & Kualitas Air</h1>
+                <p class="text-sm text-slate-500">Pantau kondisi sensor kolam secara real-time untuk hasil panen optimal.</p>
+            </div>
+            <div class="flex gap-2">
+                <select id="selectKolam" class="bg-white border border-slate-300 text-sm rounded-lg px-3 py-2 outline-none focus:ring-2 focus:ring-cyan-500">
+                    <option>Kolam A - Ikan Nila (Blok 1)</option>
+                    <option>Kolam B - Ikan Lele (Blok 2)</option>
+                    <option>Kolam C - Ikan Gurame (Blok 3)</option>
+                </select>
+                <button onclick="refreshSensor()" class="bg-cyan-600 hover:bg-cyan-700 text-white px-4 py-2 rounded-lg text-sm transition flex items-center gap-2 cursor-pointer">
+                    <i class="fa-solid fa-rotate-right"></i> Segarkan
+                </button>
+            </div>
+        </div>
+
+        <!-- Kartu Metrik Sensor -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+            <div class="bg-white p-5 rounded-xl shadow-sm border border-slate-200 flex items-center justify-between">
+                <div>
+                    <p class="text-xs text-slate-500 font-medium uppercase">Suhu Air</p>
+                    <h3 class="text-2xl font-bold text-slate-800 mt-1" id="valSuhu">28.5 °C</h3>
+                    <span class="text-xs text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded mt-2 inline-block">Normal (27-30)</span>
+                </div>
+                <div class="w-12 h-12 bg-orange-100 text-orange-600 rounded-xl flex items-center justify-center text-xl">
+                    <i class="fa-solid fa-temperature-half"></i>
+                </div>
+            </div>
+
+            <div class="bg-white p-5 rounded-xl shadow-sm border border-slate-200 flex items-center justify-between">
+                <div>
+                    <p class="text-xs text-slate-500 font-medium uppercase">Kadar pH</p>
+                    <h3 class="text-2xl font-bold text-slate-800 mt-1" id="valPh">7.2</h3>
+                    <span class="text-xs text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded mt-2 inline-block">Optimal (6.5-8.0)</span>
+                </div>
+                <div class="w-12 h-12 bg-blue-100 text-blue-600 rounded-xl flex items-center justify-center text-xl">
+                    <i class="fa-solid fa-flask"></i>
+                </div>
+            </div>
+
+            <div class="bg-white p-5 rounded-xl shadow-sm border border-slate-200 flex items-center justify-between">
+                <div>
+                    <p class="text-xs text-slate-500 font-medium uppercase">Oksigen Terlarut (DO)</p>
+                    <h3 class="text-2xl font-bold text-slate-800 mt-1" id="valDo">5.8 mg/L</h3>
+                    <span class="text-xs text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded mt-2 inline-block">Aman (>5.0)</span>
+                </div>
+                <div class="w-12 h-12 bg-cyan-100 text-cyan-600 rounded-xl flex items-center justify-center text-xl">
+                    <i class="fa-solid fa-wind"></i>
+                </div>
+            </div>
+
+            <div class="bg-white p-5 rounded-xl shadow-sm border border-slate-200 flex items-center justify-between">
+                <div>
+                    <p class="text-xs text-slate-500 font-medium uppercase">Kekeruhan</p>
+                    <h3 class="text-2xl font-bold text-slate-800 mt-1" id="valTurbidity">25 NTU</h3>
+                    <span class="text-xs text-amber-600 bg-amber-50 px-2 py-0.5 rounded mt-2 inline-block">Perlu Perhatian</span>
+                </div>
+                <div class="w-12 h-12 bg-amber-100 text-amber-600 rounded-xl flex items-center justify-center text-xl">
+                    <i class="fa-solid fa-droplet"></i>
+                </div>
+            </div>
+        </div>
+
+        <!-- Grafik Sensor & Kontrol Perangkat -->
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            <div class="lg:col-span-2 bg-white p-6 rounded-xl shadow-sm border border-slate-200">
+                <h3 class="text-base font-semibold text-slate-800 mb-4">Grafik Fluktuasi pH & Suhu (24 Jam Terakhir)</h3>
+                <div class="h-64">
+                    <canvas id="sensorChart"></canvas>
+                </div>
+            </div>
+
+            <div class="bg-white p-6 rounded-xl shadow-sm border border-slate-200 flex flex-col justify-between">
+                <div>
+                    <h3 class="text-base font-semibold text-slate-800 mb-4">Kontrol Otomasi Perangkat</h3>
+                    <div class="space-y-4">
+                        <div class="flex items-center justify-between p-3 bg-slate-50 rounded-lg border border-slate-100">
+                            <div class="flex items-center gap-3">
+                                <i class="fa-solid fa-fan text-cyan-600 text-lg"></i>
+                                <div>
+                                    <p class="text-sm font-medium">Kincir Air (Aerator)</p>
+                                    <p class="text-xs text-slate-400">Status: <span id="statusAerator" class="text-emerald-600 font-semibold">Aktif (Otomatis)</span></p>
+                                </div>
+                            </div>
+                            <label class="relative inline-flex items-center cursor-pointer">
+                                <input type="checkbox" checked onchange="toggleDevice('aerator')" class="sr-only peer">
+                                <div class="w-11 h-6 bg-slate-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-cyan-600"></div>
+                            </label>
+                        </div>
+
+                        <div class="flex items-center justify-between p-3 bg-slate-50 rounded-lg border border-slate-100">
+                            <div class="flex items-center gap-3">
+                                <i class="fa-solid fa-bowl-food text-cyan-600 text-lg"></i>
+                                <div>
+                                    <p class="text-sm font-medium">Auto Feeder (Pakan)</p>
+                                    <p class="text-xs text-slate-400">Jadwal: 08:00 & 16:00</p>
+                                </div>
+                            </div>
+                            <label class="relative inline-flex items-center cursor-pointer">
+                                <input type="checkbox" checked onchange="toggleDevice('feeder')" class="sr-only peer">
+                                <div class="w-11 h-6 bg-slate-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-cyan-600"></div>
+                            </label>
+                        </div>
+                    </div>
+                </div>
+                <div class="mt-4 pt-4 border-t border-slate-100">
+                    <button onclick="feedNow()" class="w-full bg-slate-900 hover:bg-slate-800 text-white text-sm py-2.5 rounded-lg transition cursor-pointer">
+                        <i class="fa-solid fa-paper-plane mr-2"></i> Beri Pakan Manual Sekarang
+                    </button>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- TAB 2: MARKETPLACE / PASAR IKAN -->
+    <section id="marketplace" class="tab-content hidden space-y-6">
+        <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+            <div>
+                <h1 class="text-2xl font-bold text-slate-900">Pasar Ikan & Lelang Online</h1>
+                <p class="text-sm text-slate-500">Jual beli hasil panen langsung dari petambak terverifikasi.</p>
+            </div>
+            <div class="flex gap-2 w-full md:w-auto">
+                <input type="text" id="searchMarket" placeholder="Cari jenis ikan..." class="bg-white border border-slate-300 text-sm rounded-lg px-4 py-2 outline-none focus:ring-2 focus:ring-cyan-500 flex-grow md:w-64">
+                <button onclick="openAddProductModal()" class="bg-cyan-600 hover:bg-cyan-700 text-white px-4 py-2 rounded-lg text-sm transition flex items-center gap-2 cursor-pointer whitespace-nowrap">
+                    <i class="fa-solid fa-plus"></i> Jual Ikan
+                </button>
+            </div>
+        </div>
+
+        <!-- Grid Produk Ikan -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6" id="productGrid">
+            <!-- Data produk akan di-generate via JavaScript -->
+        </div>
+    </section>
+
+    <!-- TAB 3: KALKULATOR PAKAN -->
+    <section id="calculator" class="tab-content hidden space-y-6">
+        <div class="max-w-2xl mx-auto bg-white p-8 rounded-2xl shadow-sm border border-slate-200">
+            <h1 class="text-xl font-bold text-slate-900 mb-2">Kalkulator Kebutuhan Pakan (FCR)</h1>
+            <p class="text-sm text-slate-500 mb-6">Hitung estimasi jumlah pakan harian berdasarkan biomassa dan umur ikan untuk efisiensi biaya.</p>
+            
+            <div class="space-y-4">
+                <div>
+                    <label class="block text-sm font-medium text-slate-700 mb-1">Jenis Ikan</label>
+                    <select id="calcJenis" class="w-full bg-white border border-slate-300 text-sm rounded-lg p-3 outline-none focus:ring-2 focus:ring-cyan-500">
+                        <option value="0.03">Ikan Nila (Feeding Rate ~3% biomassa)</option>
+                        <option value="0.04">Ikan Lele (Feeding Rate ~4% biomassa)</option>
+                        <option value="0.025">Ikan Gurame (Feeding Rate ~2.5% biomassa)</option>
+                        <option value="0.035">Ikan Mas (Feeding Rate ~3.5% biomassa)</option>
+                    </select>
+                </div>
+
+                <div>
+                    <label class="block text-sm font-medium text-slate-700 mb-1">Total Populasi Ikan (Ekor)</label>
+                    <input type="number" id="calcPopulasi" value="1000" class="w-full border border-slate-300 text-sm rounded-lg p-3 outline-none focus:ring-2 focus:ring-cyan-500">
+                </div>
+
+                <div>
+                    <label class="block text-sm font-medium text-slate-700 mb-1">Rata-rata Berat Ikan Saat Ini (Gram / Ekor)</label>
+                    <input type="number" id="calcBerat" value="150" class="w-full border border-slate-300 text-sm rounded-lg p-3 outline-none focus:ring-2 focus:ring-cyan-500">
+                </div>
+
+                <button onclick="hitungPakan()" class="w-full bg-cyan-600 hover:bg-cyan-700 text-white font-medium py-3 rounded-xl transition cursor-pointer mt-2">
+                    Hitung Kebutuhan Pakan
+                </button>
+            </div>
+
+            <!-- Hasil Kalkulasi -->
+            <div id="resultBox" class="mt-6 p-5 bg-cyan-50 rounded-xl border border-cyan-100 hidden">
+                <h3 class="text-sm font-bold text-cyan-900 uppercase tracking-wide">Hasil Estimasi Harian:</h3>
+                <div class="mt-3 grid grid-cols-2 gap-4">
+                    <div>
+                        <p class="text-xs text-slate-500">Total Biomassa Kolam</p>
+                        <p id="resBiomassa" class="text-lg font-bold text-slate-800">0 Kg</p>
+                    </div>
+                    <div>
+                        <p class="text-xs text-slate-500">Kebutuhan Pakan / Hari</p>
+                        <p id="resPakan" class="text-lg font-bold text-cyan-700">0 Kg</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- TAB 4: KONSULTASI AHLI / FORUM -->
+    <section id="forum" class="tab-content hidden space-y-6">
+        <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+            <div>
+                <h1 class="text-2xl font-bold text-slate-900">Konsultasi Pakar & Forum Petambak</h1>
+                <p class="text-sm text-slate-500">Tanyakan masalah penyakit ikan atau kualitas air kepada ahli perikanan kami.</p>
+            </div>
+            <button onclick="openModalKonsul()" class="bg-cyan-600 hover:bg-cyan-700 text-white px-4 py-2 rounded-lg text-sm transition flex items-center gap-2 cursor-pointer">
+                <i class="fa-solid fa-comment-medical"></i> Buat Pertanyaan Baru
+            </button>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <!-- Daftar Diskusi -->
+            <div class="md:col-span-2 space-y-4" id="forumList">
+                <!-- Data Diskusi akan di-load lewat JS -->
+            </div>
+
+            <!-- Pakar Siaga -->
+            <div class="bg-white p-5 rounded-xl shadow-sm border border-slate-200 h-fit space-y-4">
+                <h3 class="text-base font-semibold text-slate-800">Pakar Perikanan Siaga</h3>
+                <div class="flex items-center gap-3 p-3 bg-slate-50 rounded-lg">
+                    <img src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=150&q=80" class="w-10 h-10 rounded-full object-cover">
+                    <div>
+                        <h4 class="text-sm font-semibold text-slate-800">Dr. Ir. Siti Rahma, M.Sc</h4>
+                        <p class="text-xs text-cyan-600">Spesialis Patologi & Kesehatan Ikan</p>
+                    </div>
+                </div>
+                <div class="flex items-center gap-3 p-3 bg-slate-50 rounded-lg">
+                    <img src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=150&q=80" class="w-10 h-10 rounded-full object-cover">
+                    <div>
+                        <h4 class="text-sm font-semibold text-slate-800">Budi Santoso, S.Pi</h4>
+                        <p class="text-xs text-cyan-600">Ahli Manajemen Kualitas Air</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+</main>
+
+<!-- Modal Jual Ikan -->
+<div id="modalProduct" class="fixed inset-0 bg-black/50 hidden items-center justify-center z-50 p-4">
+    <div class="bg-white max-w-md w-full p-6 rounded-2xl shadow-lg space-y-4">
+        <h3 class="text-lg font-bold text-slate-900">Tambah Listing Penjualan Ikan</h3>
+        <div class="space-y-3">
+            <div>
+                <label class="block text-xs font-medium text-slate-600 mb-1">Nama Ikan</label>
+                <input type="text" id="inputNamaIkan" placeholder="Contoh: Ikan Nila Merah Segar" class="w-full border border-slate-300 text-sm rounded-lg p-2.5 outline-none focus:ring-2 focus:ring-cyan-500">
+            </div>
+            <div class="grid grid-cols-2 gap-3">
+                <div>
+                    <label class="block text-xs font-medium text-slate-600 mb-1">Harga / Kg (Rp)</label>
+                    <input type="number" id="inputHarga" placeholder="32000" class="w-full border border-slate-300 text-sm rounded-lg p-2.5 outline-none focus:ring-2 focus:ring-cyan-500">
+                </div>
+                <div>
+                    <label class="block text-xs font-medium text-slate-600 mb-1">Stok Ready (Kg)</label>
+                    <input type="number" id="inputStok" placeholder="500" class="w-full border border-slate-300 text-sm rounded-lg p-2.5 outline-none focus:ring-2 focus:ring-cyan-500">
+                </div>
+            </div>
+            <div>
+                <label class="block text-xs font-medium text-slate-600 mb-1">Lokasi Tambak</label>
+                <input type="text" id="inputLokasi" placeholder="Subang, Jawa Barat" class="w-full border border-slate-300 text-sm rounded-lg p-2.5 outline-none focus:ring-2 focus:ring-cyan-500">
+            </div>
+        </div>
+        <div class="flex justify-end gap-2 pt-3">
+            <button onclick="closeAddProductModal()" class="px-4 py-2 text-sm text-slate-600 hover:bg-slate-100 rounded-lg cursor-pointer">Batal</button>
+            <button onclick="saveProduct()" class="px-4 py-2 text-sm bg-cyan-600 text-white rounded-lg hover:bg-cyan-700 cursor-pointer">Simpan & Tayangkan</button>
+        </div>
+    </div>
+</div>
+
+<!-- JavaScript Aplikasi -->
+<script>
+    // Navigasi Tab
+    function switchTab(targetId) {
+        document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden'));
+        document.getElementById(targetId).classList.remove('hidden');
+
+        document.querySelectorAll('.nav-link').forEach(el => el.classList.remove('text-cyan-200', 'font-bold'));
+        event.target.classList.add('text-cyan-200', 'font-bold');
+    }
+
+    // Grafik Chart.js Dashboard
+    const ctx = document.getElementById('sensorChart').getContext('2d');
+    const sensorChart = new Chart(ctx, {
+        type: 'line',
+        data: {
+            labels: ['00:00', '04:00', '08:00', '12:00', '16:00', '20:00'],
+            datasets: [
+                {
+                    label: 'pH Air',
+                    data: [7.0, 7.1, 7.3, 7.5, 7.2, 7.2],
+                    borderColor: '#0891b2',
+                    backgroundColor: '#0891b220',
+                    tension: 0.3,
+                    yAxisID: 'y-ph'
+                },
+                {
+                    label: 'Suhu (°C)',
+                    data: [27, 26.8, 28, 29.5, 29, 28.5],
+                    borderColor: '#f97316',
+                    backgroundColor: '#f9731620',
+                    tension: 0.3,
+                    yAxisID: 'y-temp'
+                }
+            ]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            scales: {
+                'y-ph': { type: 'linear', position: 'left', min: 5, max: 10 },
+                'y-temp': { type: 'linear', position: 'right', min: 20, max: 35, grid: { drawOnChartArea: false } }
+            }
+        }
+    });
+
+    function refreshSensor() {
+        document.getElementById('valSuhu').innerText = (27 + Math.random() * 3).toFixed(1) + ' °C';
+        document.getElementById('valPh').innerText = (6.8 + Math.random() * 0.8).toFixed(1);
+        document.getElementById('valDo').innerText = (5.0 + Math.random() * 1.5).toFixed(1) + ' mg/L';
+        alert('Data sensor berhasil diperbarui dari IoT Kolam!');
+    }
+
+    function toggleDevice(device) {
+        if(device === 'aerator') {
+            let status = document.getElementById('statusAerator');
+            if(status.innerText.includes('Aktif')) {
+                status.innerText = 'Dimatikan Manual';
+                status.className = 'text-rose-600 font-semibold';
+            } else {
+                status.innerText = 'Aktif (Otomatis)';
+                status.className = 'text-emerald-600 font-semibold';
+            }
+        }
+    }
+
+    function feedNow() {
+        alert('Perintah terkirim: Auto Feeder telah mengeluarkan pakan sebanyak 500 gram ke kolam.');
+    }
+
+    // Data Marketplace Mock
+    let products = [
+        { name: 'Ikan Nila Merah Super', price: 32000, stock: 450, location: 'Subang, Jabar', img: 'https://images.unsplash.com/photo-1524704654690-3533eefc09ff?auto=format&fit=crop&w=400&q=80' },
+        { name: 'Ikan Lele Sangkuriang', price: 24000, stock: 1200, location: 'Bogor, Jabar', img: 'https://images.unsplash.com/photo-1534567153574-2b12153a87f0?auto=format&fit=crop&w=400&q=80' },
+        { name: 'Ikan Gurame Soang', price: 55000, stock: 300, location: 'Tasikmalaya', img: 'https://images.unsplash.com/photo-1544551763-46a013bb70d5?auto=format&fit=crop&w=400&q=80' },
+        { name: 'Ikan Mas Hitam Konsumsi', price: 35000, stock: 600, location: 'Cianjur', img: 'https://images.unsplash.com/photo-1522069169874-c58ec4b76be5?auto=format&fit=crop&w=400&q=80' }
+    ];
+
+    function renderProducts() {
+        const grid = document.getElementById('productGrid');
+        grid.innerHTML = products.map(p => `
+            <div class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden flex flex-col justify-between">
+                <div>
+                    <img src="${p.img}" class="w-full h-40 object-cover">
+                    <div class="p-4 space-y-1">
+                        <span class="text-xs text-cyan-600 font-semibold">${p.location}</span>
+                        <h3 class="font-bold text-slate-800">${p.name}</h3>
+                        <p class="text-lg font-bold text-slate-900">Rp ${p.toLocaleString('id-ID')} <span class="text-xs font-normal text-slate-500">/ kg</span></p>
+                        <p class="text-xs text-slate-400">Stok Tersedia: ${p.stock} Kg</p>
+                    </div>
+                </div>
+                <div class="p-4 pt-0">
+                    <button onclick="buyProduct('${p.name}')" class="w-full bg-cyan-600 hover:bg-cyan-700 text-white text-sm py-2 rounded-lg transition cursor-pointer">
+                        Pesan / Beli
+                    </button>
+                </div>
+            </div>
+        `).join('');
+    }
+    renderProducts();
+
+    function openAddProductModal() {
+        document.getElementById('modalProduct').classList.remove('hidden');
+        document.getElementById('modalProduct').classList.add('flex');
+    }
+
+    function closeAddProductModal() {
+        document.getElementById('modalProduct').classList.add('hidden');
+        document.getElementById('modalProduct').classList.remove('flex');
+    }
+
+    function saveProduct() {
+        let name = document.getElementById('inputNamaIkan').value;
+        let price = parseInt(document.getElementById('inputHarga').value);
+        let stock = parseInt(document.getElementById('inputStok').value);
+        let location = document.getElementById('inputLokasi').value;
+
+        if(!name || !price || !stock) {
+            alert('Harap isi semua kolom dengan benar!');
+            return;
+        }
+
+        products.unshift({ name, price, stock, location, img: 'https://images.unsplash.com/photo-1524704654690-3533eefc09ff?auto=format&fit=crop&w=400&q=80' });
+        renderProducts();
+        closeAddProductModal();
+        alert('Listing produk ikan berhasil ditayangkan!');
+    }
+
+    function buyProduct(name) {
+        alert(`Menghubungkan Anda ke WhatsApp penjual untuk produk: ${name}`);
+    }
+
+    // Kalkulator Pakan
+    function hitungPakan() {
+        let feedingRate = parseFloat(document.getElementById('calcJenis').value);
+        let populasi = parseInt(document.getElementById('calcPopulasi').value);
+        let beratGram = parseFloat(document.getElementById('calcBerat').value);
+
+        let totalBiomassaGram = populasi * beratGram;
+        let totalBiomassaKg = totalBiomassaGram / 1000;
+        let pakanHarianKg = totalBiomassaKg * feedingRate;
+
+        document.getElementById('resBiomassa').innerText = totalBiomassaKg.toFixed(1) + ' Kg';
+        document.getElementById('resPakan').innerText = pakanHarianKg.toFixed(1) + ' Kg / hari';
+        document.getElementById('resultBox').classList.remove('hidden');
+    }
+
+    // Forum / Diskusi Mock
+    let discussions = [
+        { title: 'Ikan Nila menggantung di permukaan air pagi hari, apa solusinya?', author: 'Pak Joko (Petambak Subang)', replies: 5, category: 'Kualitas Air', time: '2 jam lalu' },
+        { title: 'Rekomendasi jenis pelet protein tinggi untuk percepatan masa pertumbuhan Lele', author: 'Rian Budidaya', replies: 8, category: 'Pakan & Nutrisi', time: '4 jam lalu' },
+        { title: 'Bintik putih pada sirip ikan Gurame, obat alami yang ampuh apa ya?', author: 'Dewi Kolam', replies: 12, category: 'Penyakit Ikan', time: 'Kemarin' }
+    ];
+
+    function renderForum() {
+        const list = document.getElementById('forumList');
+        list.innerHTML = discussions.map(d => `
+            <div class="bg-white p-5 rounded-xl shadow-sm border border-slate-200 space-y-2">
+                <div class="flex justify-between items-center text-xs">
+                    <span class="bg-cyan-50 text-cyan-700 px-2.5 py-1 rounded-md font-medium">${d.category}</span>
+                    <span class="text-slate-400">${d.time}</span>
+                </div>
+                <h3 class="font-bold text-slate-800 text-base hover:text-cyan-600 cursor-pointer">${d.title}</h3>
+                <div class="flex justify-between items-center text-xs text-slate-500 pt-2 border-t border-slate-100">
+                    <span>Oleh: <strong class="text-slate-700">${d.author}</strong></span>
+                    <span><i class="fa-solid fa-comment mr-1"></i> ${d.replies} Diskusi / Jawaban</span>
+                </div>
+            </div>
+        `).join('');
+    }
+    renderForum();
+
+    function openModalKonsul() {
+        let judul = prompt('Tuliskan pertanyaan atau masalah perikanan Anda:');
+        if(judul) {
+            discussions.unshift({ title: judul, author: 'Anda (Petambak)', replies: 0, category: 'Konsultasi Umum', time: 'Baru saja' });
+            renderForum();
+            alert('Pertanyaan berhasil dikirim ke Pakar Perikanan.');
+        }
+<    }
+/script>
